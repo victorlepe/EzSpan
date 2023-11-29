@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 // ReSharper disable ForCanBeConvertedToForeach
 
 namespace EzSpan;
@@ -87,17 +86,15 @@ public static class SpanEnum
         if(span.IsEmpty)
             ThrowUtils.ThrowNoElements();
         var sum = span[0];
-        var count = 1;
         for (int i = 1; i < span.Length; i++)
         {
             checked
             {
                 sum += span[i];
-                count++;
             }
         }
 
-        return TResult.CreateChecked(sum) / TResult.CreateChecked(count);
+        return TResult.CreateChecked(sum) / TResult.CreateChecked(span.Length);
     }
     
     private static TResult? Average<T, TResult>(ReadOnlySpan<T?> span) 
@@ -171,6 +168,7 @@ public static class SpanEnum
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [Obsolete("Use span.Length")]
     public static int Count<T>(this ReadOnlySpan<T> span) => span.Length;
 
     public static int Count<T>(this ReadOnlySpan<T> span, Func<T, bool> predicate)
@@ -238,6 +236,7 @@ public static class SpanEnum
             result = span[i]!;
             if (predicate(result))
             {
+                i++;
                 for (; i < span.Length; i++)
                 {
                     if(predicate(span[i]))
@@ -460,14 +459,14 @@ public static class SpanEnum
     {
         if (count < 0)
             ThrowUtils.ThrowOnlyNonNegative(nameof(count));
-        return span.Length < count ? ReadOnlySpan<T>.Empty : span[count..];
+        return span.Length <= count ? ReadOnlySpan<T>.Empty : span[count..];
     }
 
     public static ReadOnlySpan<T> SkipLast<T>(this ReadOnlySpan<T> span, int count)
     {
         if (count < 0)
             ThrowUtils.ThrowOnlyNonNegative(nameof(count));
-        return span.Length < count ? ReadOnlySpan<T>.Empty : span[..^count];
+        return span.Length <= count ? ReadOnlySpan<T>.Empty : span[..^count];
     }
 
     private static T Sum<T>(ReadOnlySpan<T> span) where T : struct, INumberBase<T>
@@ -608,7 +607,7 @@ public static class SpanEnum
     {
         if (count < 0)
             ThrowUtils.ThrowOnlyNonNegative(nameof(count));
-        return span.Length < count ? span : span[count..];
+        return span.Length <= count ? span : span[^count..];
     }
 
     public static Dictionary<TKey, T> ToDictionary<T, TKey>(this ReadOnlySpan<T> span,
@@ -666,7 +665,5 @@ public static class SpanEnum
             list.Add(span[i]);
         return list;
     }
-    
-    // TODO: Testing
     // TODO: ToLookup()
 }
