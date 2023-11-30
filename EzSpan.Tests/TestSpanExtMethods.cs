@@ -399,4 +399,35 @@ public class TestSpanExtMethods
         ReadOnlySpan<int> span = array;
         Assert.Equal(array.ToList().AsEnumerable(), span.ToList().AsEnumerable());
     }
+
+    [Fact]
+    public void ToLookup()
+    {
+        var array = new[] { (0, "Apple"), (0, "Orange"), (1, "Tangerine"), (2, "Orange"), (2, "Banana"), (3, "Anana"), (3, "Pinapple") };
+        ReadOnlySpan<(int, string)> span = array;
+
+        var comparer1 = LookupComparer<int, (int, string)>.Default;
+        var comparer2 = LookupComparer<int, string>.Default;
+        var allwaysTrue = new CustomEqualityComparer<int>((_, _) => true);
+        
+        Assert.Equal(
+            array.ToLookup(t => t.Item1), 
+            span.ToLookup(t => t.Item1), 
+            comparer1);
+        
+        Assert.Equal(
+            array.ToLookup(t => t.Item1, allwaysTrue),
+            span.ToLookup(t => t.Item1, allwaysTrue),
+            comparer1);
+        
+        Assert.Equal(
+            array.ToLookup(t => t.Item1, t => t.Item2), 
+            span.ToLookup(t => t.Item1, t => t.Item2), 
+            comparer2);
+        
+        Assert.Equal(
+            array.ToLookup(t => t.Item1, t => t.Item2, allwaysTrue),
+            span.ToLookup(t => t.Item1, t => t.Item2, allwaysTrue),
+            comparer2);
+    }
 }

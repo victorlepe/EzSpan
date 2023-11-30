@@ -665,5 +665,26 @@ public static class SpanEnum
             list.Add(span[i]);
         return list;
     }
-    // TODO: ToLookup()
+
+    public static ILookup<TKey, T> ToLookup<T, TKey>(this ReadOnlySpan<T> span, Func<T, TKey> keySelector)
+    {
+        return span.ToLookup(keySelector, EqualityComparer<TKey>.Default);
+    }
+    
+    public static ILookup<TKey, T> ToLookup<T, TKey>(this ReadOnlySpan<T> span, Func<T, TKey> keySelector, IEqualityComparer<TKey> keyComparer)
+    {
+        return Lookup<TKey, T>.Create(span, keySelector, keyComparer);
+    }
+    
+    public static ILookup<TKey, TElement> ToLookup<T, TKey, TElement>(this ReadOnlySpan<T> span,
+        Func<T, TKey> keySelector, Func<T, TElement> elementSelector)
+    {
+        return span.ToLookup(keySelector, elementSelector, EqualityComparer<TKey>.Default);
+    }
+    
+    public static ILookup<TKey, TElement> ToLookup<T, TKey, TElement>(this ReadOnlySpan<T> span,
+        Func<T, TKey> keySelector, Func<T, TElement> elementSelector, IEqualityComparer<TKey> keyComparer)
+    {
+        return Lookup<TKey, TElement>.Create(span, keySelector, elementSelector, keyComparer);
+    }
 }
